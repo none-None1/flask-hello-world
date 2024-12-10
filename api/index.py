@@ -1,4 +1,6 @@
-from os import environ
+from os import environ,chdir
+from os.path import dirname
+chdir(dirname(__file__))
 from mido import MidiFile,MidiTrack,Message,MetaMessage,bpm2tempo
 from random import *
 import sys
@@ -103,3 +105,18 @@ def upload_l2b(): #上传文件
     print(bf)
     remove(fn)
     return render_template('l2b_result.html',code=bf)
+@app.route('/upload_li', methods=['POST'])
+def upload_li(): #上传文件
+    if 'file' not in request.files: #必须有文件信息
+        return err('No file part','/li')
+    f=request.files['file']
+    if f.filename=='': #必须有文件
+        return err('No file uploaded','/li')
+    if not f.filename.endswith('.mid'): #必须是MIDI文件
+        return err('Only MIDI files may be uploaded','/li')
+    fn='uploads/'+rand_fn()
+    f.save(fn)
+    bf=notes2brainfuck(mid2notes(fn))
+    print(bf)
+    remove(fn)
+    return render_template('li_result.html',code=bf)
