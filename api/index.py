@@ -99,7 +99,7 @@ def upload_l2b(): #上传文件
         return err('No file uploaded','/l2b')
     if not f.filename.endswith('.mid'): #必须是MIDI文件
         return err('Only MIDI files may be uploaded','/l2b')
-    fn='uploads/'+rand_fn()
+    fn=rand_fn()
     f.save(fn)
     bf=notes2brainfuck(mid2notes(fn))
     print(bf)
