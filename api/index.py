@@ -103,4 +103,7 @@ def upload_l2b(): #上传文件
     print(bf)
     remove(fn)
     return render_template('l2b_result.html',code=bf)
-app.run()
+try:
+    open('local.txt').read()
+except:
+    app.run()
