@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" style="font-family:Cascadia Code,Consolas,monospace">
+<head>
+    <meta charset="UTF-8">
+    <title>Look! to brainfuck</title>
+</head>
+<body>
+{% for message in get_flashed_messages() %}
+    <div class="alert" style="color:red">{{ message }}</div>
+    <hr>
+{% endfor %}
+<h1>Look! to brainfuck</h1>
+  Upload a MIDI file (max size: 16MiB): <form method="post" enctype="multipart/form-data" action="/upload_l2b"><input
+      type="file"
+      title="Upload a MIDI file"
+      name="file"
+    />
+    <input type="submit" value="Upload!" name="submit">
+</form>
+</body>
+</html>
