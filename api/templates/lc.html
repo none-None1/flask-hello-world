@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html style="font-family:Cascadia Code,Consolas,monospace">
+    <head>
+        <title>brainfuck to Look!</title>
+    </head>
+    <body>
+        <h1>brainfuck to Look!</h1>
+        <textarea cols="80" rows="20" style="font-family:Cascadia Code,Consolas,monospace" placeholder="Write some brainfuck code here..." id="codebox"></textarea>
+        <form method="post" enctype="multipart/form-data" action="/upload_lc" id="lcform"><input
+            type="hidden"
+            name="code"
+            id="bfcode"
+            style="display: none;"
+          />
+        <script>
+            function submit_form(){
+                document.getElementById('bfcode').value=document.getElementById('codebox').value;
+                document.getElementById('lcform').submit();
+            }
+        </script>
+        <button onclick="submit_form()">Submit!</button>
+    </body>
+</html>

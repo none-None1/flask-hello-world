@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" style="font-family:Cascadia Code,Consolas,monospace">
+<head>
+    <meta charset="UTF-8">
+    <title>Look! interpreter</title>
+</head>
+<body>
+<p id="code" style="display:none">{{code}}</p>
+<h1>Look! interpreter</h1>
+<textarea id="input" cols="80" rows="20" style="font-family:Cascadia Code,Consolas,monospace" placeholder="input"></textarea>
+<textarea id="output" cols="80" rows="20" style="font-family:Cascadia Code,Consolas,monospace" readonly placeholder="output"></textarea>
+<script src="bf.js"></script>
+<script>
+function runcode(){
+  try{
+    document.getElementById('output').value=brainfuck(document.getElementById('code').innerText,document.getElementById('input').value);
+  }catch(e){
+    document.getElementById('output').value=e.message;
+  }
+}</script>
+<button onclick="runcode()">Run!</button>
+</body>
+</html>

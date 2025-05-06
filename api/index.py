@@ -1,6 +1,6 @@
 from os import environ,chdir
 from os.path import dirname
-chdir(dirname(__file__))
+from io import BytesIO
 from mido import MidiFile,MidiTrack,Message,MetaMessage,bpm2tempo
 from random import *
 import sys
@@ -58,9 +58,9 @@ def notes2mid(notes_,fn,bpm=120,velocity=127):
     for i in notes_:
         track.append(Message('note_on',note=60+notes.index(i),velocity=velocity,time=0))
         track.append(Message('note_off', note=60 + notes.index(i), time=480))
-    file.save(fn)
+    file.save(file=fn)
 def mid2notes(fn):
-    file=MidiFile(fn)
+    file=MidiFile(file=fn)
     track=file.tracks[0]
     result=[]
     for msg in track:
@@ -73,37 +73,45 @@ def interpret(fn):
 
 from flask import *
 from uuid import uuid4
-from os import remove
-def rand_fn(): #随机文件名
-    return str(uuid4())+'.mid'
-def err(msg,red): #发送错误消息
+def err(msg,red): #发送错误消息 send error message
     flash(msg)
     return redirect(red)
 app = Flask(__name__)
-app.config['MAX_CONTENT_LENGTH'] = 16777216 #最大大小：16MiB
-app.secret_key='a'
+app.config['MAX_CONTENT_LENGTH'] = 16777216 #最大大小：16MiB max size:16MiB
+import os
+if os.getenv('SEC_KEY'):
+    app.secret_key=os.getenv('SEC_KEY')
+else:
+    app.secret_key='a'
 @app.route('/')
 def home(): #主页
     return render_template('index.html')
 
 
 @app.route('/l2b')
-def l2b(): #Look!转brainfuck功能
+def l2b(): #Look!转brainfuck功能 Look! to BF
     return render_template('l2b.html')
+@app.route('/li')
+def li(): #Look!解释功能 Look! interpreter
+    return render_template('li.html')
+@app.route('/lc')
+def lc(): #brainfuck转Look!功能 BF to Look!
+    return render_template('lc.html')
+@app.route('/bf.js')
+def lijs(): 
+    return render_template('bf.js')
 @app.route('/upload_l2b', methods=['POST'])
 def upload_l2b(): #上传文件
-    if 'file' not in request.files: #必须有文件信息
+    if 'file' not in request.files: #必须有文件信息 Must have file info
         return err('No file part','/l2b')
     f=request.files['file']
-    if f.filename=='': #必须有文件
+    if f.filename=='': #必须有文件 Must have file
         return err('No file uploaded','/l2b')
-    if not f.filename.endswith('.mid'): #必须是MIDI文件
+    if not f.filename.endswith('.mid'): #必须是MIDI文件 Must be MIDI file
         return err('Only MIDI files may be uploaded','/l2b')
-    fn=rand_fn()
-    f.save(fn)
-    bf=notes2brainfuck(mid2notes(fn))
-    print(bf)
-    remove(fn)
+    k=f.read()
+    b=BytesIO(k)
+    bf=notes2brainfuck(mid2notes(b))
     return render_template('l2b_result.html',code=bf)
 @app.route('/upload_li', methods=['POST'])
 def upload_li(): #上传文件
@@ -114,9 +122,16 @@ def upload_li(): #上传文件
         return err('No file uploaded','/li')
     if not f.filename.endswith('.mid'): #必须是MIDI文件
         return err('Only MIDI files may be uploaded','/li')
-    fn='uploads/'+rand_fn()
-    f.save(fn)
-    bf=notes2brainfuck(mid2notes(fn))
-    print(bf)
-    remove(fn)
+    k=f.read()
+    b=BytesIO(k)
+    bf=notes2brainfuck(mid2notes(b))
     return render_template('li_result.html',code=bf)
+@app.route('/upload_lc', methods=['POST'])
+def upload_lc(): #上传文件
+    fm=request.form.get('code','')
+    fm=''.join(filter(lambda x:x in'+-><,.[]',fm))
+    b=BytesIO()
+    nts=brainfuck2notes(fm)
+    notes2mid(nts,b)
+    b.seek(0)
+    return send_file(b,mimetype='audio/midi',as_attachment=True,download_name='code.mid')
